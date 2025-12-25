@@ -1,74 +1,142 @@
-<<<<<<< HEAD
-# Getting Started with Create React App
+# Get Done
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A simple and beautiful task management app. A PWA (Progressive Web App) inspired by Things 3.
 
-## Available Scripts
+![Get Done](https://img.shields.io/badge/React-19.2.3-blue)
+![PWA](https://img.shields.io/badge/PWA-Ready-green)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
-In the project directory, you can run:
+## ✨ Features
 
-### `npm start`
+- 📱 **PWA Support**: Works offline and can be installed as an app
+- 🎨 **Beautiful UI**: Minimal and refined design inspired by Things 3
+- ⚡ **Fast**: React-based with smooth interactions
+- 💾 **Auto-save**: Automatically saves tasks and projects
+- 🔍 **Search**: Quickly find tasks
+- 📁 **Project Management**: Organize tasks with projects
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 🚀 Quick Start
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Requirements
 
-### `npm test`
+- Node.js 16.x or higher
+- npm 8.x or higher
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Installation
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/get-done.git
+cd get-done
 
-### `npm run build`
+# Install dependencies
+npm install
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+# Start development server
+npm start
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Open http://localhost:3000 in your browser.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 📦 Build
+```bash
+# Build for production
+npm run build
+```
 
-### `npm run eject`
+Optimized files will be generated in the `build` folder.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 🎯 Usage
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Creating a Task
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+1. Click the "New" button at the bottom of the screen
+2. Enter task name and press Enter
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Creating a Project
 
-## Learn More
+1. Click the "+" button in the "Projects" section of the sidebar
+2. Enter project name
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Completing a Task
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Click the circle button on the left side of a task to toggle completion status.
 
-### Code Splitting
+### Search
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Enter keywords in the search box in the header to filter tasks.
 
-### Analyzing the Bundle Size
+## 📱 Install as PWA
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Desktop (Chrome/Edge)
 
-### Making a Progressive Web App
+1. Click the install icon in the address bar
+2. Or click "Install" from the banner at the top of the screen
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### iOS (Safari)
 
-### Advanced Configuration
+1. Tap the share button (□↑)
+2. Select "Add to Home Screen"
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### Android (Chrome)
 
-### Deployment
+1. Open menu (⋮)
+2. Select "Install app"
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## 🛠 Tech Stack
 
-### `npm run build` fails to minify
+- **Frontend**: React 19.2.3
+- **Icons**: Lucide React
+- **PWA**: Service Worker + Web App Manifest
+- **Storage**: LocalStorage (+ Claude Storage API)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-=======
-# things3-clone
->>>>>>> 44e70f8ebf98bf7b9b6a28fa1b11e4c8613fab41
+## 📁 Project Structure
+```
+get-done/
+├── public/
+│   ├── index.html          # Main HTML
+│   ├── manifest.json       # PWA configuration
+│   ├── sw.js              # Service Worker
+│   └── icons/             # App icons
+├── src/
+│   ├── App.js             # Main application
+│   ├── App.css            # Styles
+│   ├── index.js           # Entry point
+│   └── index.css          # Global styles
+├── package.json
+└── README.md
+```
+
+## 🎨 Features
+
+### ✅ Implemented
+
+- [x] Create, edit, and delete tasks
+- [x] Toggle task completion
+- [x] Project management
+- [x] Inbox, Today, and Completed views
+- [x] Search functionality
+- [x] Data persistence
+- [x] PWA support (offline capability)
+- [x] Responsive design
+
+### 🚧 Roadmap
+
+- [ ] Due date setting
+- [ ] Tag functionality
+- [ ] Drag & drop reordering
+- [ ] Dark mode
+- [ ] Areas feature
+- [ ] Data export/import
+- [ ] Cross-device sync
+
+## 🤝 Contributing
+
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+
+## 📄 License
+
+MIT License
+
+## 👤 Author
+
+Minori Sugimura
