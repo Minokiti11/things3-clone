@@ -1,5 +1,7 @@
 # Get Done
 
+[日本語](README.ja.md) | English
+
 A simple and beautiful task management app. A PWA (Progressive Web App) inspired by Things 3.
 
 ![Get Done](https://img.shields.io/badge/React-19.2.3-blue)
