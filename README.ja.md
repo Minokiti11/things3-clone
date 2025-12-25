@@ -1,6 +1,6 @@
 # Get Done
 
-[日本語](README.ja.md) | English
+日本語 | [English](README.md)
 
 シンプルで美しいタスク管理アプリ。Things 3にインスパイアされたPWA (Progressive Web App)です。
 
