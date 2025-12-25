@@ -25,7 +25,7 @@ A simple and beautiful task management app. A PWA (Progressive Web App) inspired
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/get-done.git
+git clone https://github.com/Minokiti11/get-done.git
 cd get-done
 
 # Install dependencies
