@@ -82,8 +82,8 @@ function App() {
 
   const loadData = async () => {
     try {
-      const tasksResult = await storage.get('things-tasks');
-      const projectsResult = await storage.get('things-projects');
+      const tasksResult = await storage.get('get-done-tasks');
+      const projectsResult = await storage.get('get-done-projects');
       
       if (tasksResult?.value) setTasks(JSON.parse(tasksResult.value));
       if (projectsResult?.value) setProjects(JSON.parse(projectsResult.value));
@@ -94,8 +94,8 @@ function App() {
 
   const saveData = async () => {
     try {
-      await storage.set('things-tasks', JSON.stringify(tasks));
-      await storage.set('things-projects', JSON.stringify(projects));
+      await storage.set('get-done-tasks', JSON.stringify(tasks));
+      await storage.set('get-done-projects', JSON.stringify(projects));
     } catch (error) {
       console.error('保存エラー:', error);
     }
@@ -242,7 +242,7 @@ function App() {
           padding: '16px',
           borderBottom: '1px solid #E5E7EB'
         }}>
-          <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>Things</h1>
+          <h1 style={{ fontSize: '20px', fontWeight: 'bold' }}>Get Done</h1>
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
