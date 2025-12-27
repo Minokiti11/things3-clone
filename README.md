@@ -37,24 +37,6 @@ cd get-done
 npm install
 ```
 
-### Supabase Setup
-
-1. Create a new project at [Supabase](https://supabase.com)
-2. Go to Project Settings > API and copy your project URL and anon key
-3. Create a `.env` file in the root directory:
-```bash
-REACT_APP_SUPABASE_URL=your_supabase_project_url
-REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-4. Run the SQL schema in Supabase SQL Editor (see `supabase-schema.sql`)
-5. Enable Google OAuth in Supabase:
-   - Go to Authentication > Providers
-   - Enable Google provider
-   - Add your OAuth credentials from [Google Cloud Console](https://console.cloud.google.com)
-   - Add authorized redirect URLs:
-     - `http://localhost:3000` (for development)
-     - `https://your-vercel-domain.vercel.app` (for production)
-
 ### Start Development Server
 ```bash
 npm start
@@ -70,16 +52,6 @@ npm run build
 
 Optimized files will be generated in the `build` folder.
 
-## 🚀 Deploy to Vercel
-
-1. Push your code to GitHub
-2. Import your repository in [Vercel](https://vercel.com)
-3. Add environment variables in Vercel project settings:
-   - `REACT_APP_SUPABASE_URL`: Your Supabase project URL
-   - `REACT_APP_SUPABASE_ANON_KEY`: Your Supabase anon key
-4. Deploy!
-
-Vercel will automatically build and deploy your app.
 
 ## 🎯 Usage
 
