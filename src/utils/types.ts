@@ -4,6 +4,9 @@ export interface Task {
   completed: boolean;
   projectId: number | null;
   createdAt: string;
+  dueDate?: string; // ISO string形式の期限日時
+  reminderMinutes?: number; // リマインダー時間（分）
+  userId?: string; // SupabaseのユーザーID
 }
 
 export interface Project {
