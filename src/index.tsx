@@ -19,6 +19,13 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
         console.log('Service Worker登録成功:', registration.scope);
+        
+        // 通知の許可をリクエスト
+        if ('Notification' in window && Notification.permission === 'default') {
+          Notification.requestPermission().then((permission) => {
+            console.log('通知許可状態:', permission);
+          });
+        }
       })
       .catch((error) => {
         console.log('Service Worker登録失敗:', error);

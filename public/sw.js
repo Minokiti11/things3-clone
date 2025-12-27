@@ -57,3 +57,33 @@ self.addEventListener('activate', (event) => {
   );
   return self.clients.claim();
 });
+
+// 通知の表示
+self.addEventListener('notificationclick', (event) => {
+  console.log('通知がクリックされました:', event.notification.tag);
+  event.notification.close();
+  
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // 既に開いているウィンドウがあればフォーカス
+      for (let i = 0; i < clientList.length; i++) {
+        const client = clientList[i];
+        if (client.url === '/' && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // 新しいウィンドウを開く
+      if (clients.openWindow) {
+        return clients.openWindow('/');
+      }
+    })
+  );
+});
+
+// メッセージを受信して通知を表示
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
+    const { title, options } = event.data;
+    self.registration.showNotification(title, options);
+  }
+});
