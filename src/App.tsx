@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { storage } from './utils/storage';
 import { Task, Project, ViewType } from './utils/types';
+import { supabase } from './utils/supabase';
+import { database } from './utils/database';
 import InstallBanner from './components/InstallBanner';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import TaskList from './components/TaskList';
 import NewTaskInput from './components/NewTaskInput';
+import Login from './components/Login';
 
 // BeforeInstallPromptEvent型の定義
 interface BeforeInstallPromptEvent extends Event {
@@ -20,6 +22,8 @@ declare global {
 }
 
 function App() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedView, setSelectedView] = useState<ViewType>('inbox');
@@ -29,6 +33,30 @@ function App() {
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallBanner, setShowInstallBanner] = useState<boolean>(false);
+
+  // 認証状態の監視
+  useEffect(() => {
+    // 現在のセッションを確認
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    // 認証状態の変更を監視
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        loadData(session.user.id);
+      } else {
+        setTasks([]);
+        setProjects([]);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // PWAインストールプロンプト
   useEffect(() => {
@@ -58,72 +86,89 @@ function App() {
   };
 
   // データ読み込み
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  // データ保存
-  useEffect(() => {
-    if (tasks.length > 0 || projects.length > 0) {
-      saveData();
-    }
-  }, [tasks, projects]);
-
-  const loadData = async () => {
+  const loadData = async (userId: string) => {
     try {
-      const tasksResult = await storage.get('get-done-tasks');
-      const projectsResult = await storage.get('get-done-projects');
-      
-      if (tasksResult?.value) setTasks(JSON.parse(tasksResult.value));
-      if (projectsResult?.value) setProjects(JSON.parse(projectsResult.value));
+      const loadedTasks = await database.getTasks(userId);
+      const loadedProjects = await database.getProjects(userId);
+      setTasks(loadedTasks);
+      setProjects(loadedProjects);
     } catch (error) {
-      console.log('初回起動');
+      console.error('データ読み込みエラー:', error);
     }
   };
 
-  const saveData = async () => {
-    try {
-      await storage.set('get-done-tasks', JSON.stringify(tasks));
-      await storage.set('get-done-projects', JSON.stringify(projects));
-    } catch (error) {
-      console.error('保存エラー:', error);
+  // ログイン成功時の処理
+  const handleLoginSuccess = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      await loadData(session.user.id);
     }
   };
 
-  const addTask = (text: string) => {
-    if (!text.trim()) return;
+  const addTask = async (text: string, dueDate?: string, reminderMinutes?: number) => {
+    if (!text.trim() || !user) return;
     
     const newTask: Task = {
       id: Date.now(),
       text: text.trim(),
       completed: false,
       projectId: selectedView === 'project' ? selectedProject : null,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      dueDate,
+      reminderMinutes,
+      userId: user.id,
     };
     
-    setTasks([...tasks, newTask]);
+    const savedTask = await database.saveTask(newTask);
+    if (savedTask) {
+      setTasks([...tasks, savedTask]);
+      // リマインダーを設定
+      if (dueDate && reminderMinutes) {
+        scheduleNotification(savedTask);
+      }
+    }
     setNewTaskText('');
     setShowNewTask(false);
   };
 
-  const toggleTask = (taskId: number) => {
-    setTasks(tasks.map(t => 
-      t.id === taskId ? { ...t, completed: !t.completed } : t
-    ));
+  const toggleTask = async (taskId: number) => {
+    if (!user) return;
+    
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    const updatedTask = { ...task, completed: !task.completed };
+    const savedTask = await database.saveTask(updatedTask);
+    if (savedTask) {
+      setTasks(tasks.map(t => 
+        t.id === taskId ? savedTask : t
+      ));
+    }
   };
 
-  const deleteTask = (taskId: number) => {
-    setTasks(tasks.filter(t => t.id !== taskId));
+  const deleteTask = async (taskId: number) => {
+    if (!user) return;
+    
+    const success = await database.deleteTask(taskId, user.id);
+    if (success) {
+      setTasks(tasks.filter(t => t.id !== taskId));
+    }
   };
 
-  const addProject = (name: string) => {
+  const addProject = async (name: string) => {
+    if (!user) return;
+    
     const newProject: Project = {
       id: Date.now(),
       name,
       createdAt: new Date().toISOString(),
       color: '#3B82F6'
     };
-    setProjects([...projects, newProject]);
+    
+    const savedProject = await database.saveProject(newProject, user.id);
+    if (savedProject) {
+      setProjects([...projects, savedProject]);
+    }
   };
 
   const handleViewChange = (view: ViewType, projectId: number | null) => {
@@ -166,6 +211,114 @@ function App() {
     }
   };
 
+  // 通知のスケジュール
+  const scheduleNotification = (task: Task) => {
+    if (!task.dueDate || !task.reminderMinutes) return;
+
+    const dueDate = new Date(task.dueDate);
+    const reminderTime = new Date(dueDate.getTime() - task.reminderMinutes * 60 * 1000);
+    const now = new Date();
+
+    if (reminderTime <= now) return; // 既に過ぎている場合はスキップ
+
+    const delay = reminderTime.getTime() - now.getTime();
+
+    // Service Worker経由で通知をスケジュール
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then((registration) => {
+        // タイマーで通知を送信
+        setTimeout(() => {
+          registration.showNotification('タスクのリマインダー', {
+            body: task.text,
+            icon: '/logo192.png',
+            tag: `task-${task.id}`,
+            badge: '/logo192.png',
+            requireInteraction: false,
+          });
+        }, delay);
+      });
+    } else if ('Notification' in window && Notification.permission === 'granted') {
+      // Service Workerが使えない場合は通常の通知APIを使用
+      setTimeout(() => {
+        new Notification('タスクのリマインダー', {
+          body: task.text,
+          icon: '/logo192.png',
+          tag: `task-${task.id}`,
+        });
+      }, delay);
+    }
+  };
+
+  // 既存のタスクのリマインダーを再スケジュール
+  useEffect(() => {
+    if (!user) return;
+
+    // 通知のスケジュール関数を定義
+    const scheduleTaskNotification = (task: Task) => {
+      if (!task.dueDate || !task.reminderMinutes) return;
+
+      const dueDate = new Date(task.dueDate);
+      const reminderTime = new Date(dueDate.getTime() - task.reminderMinutes * 60 * 1000);
+      const now = new Date();
+
+      if (reminderTime <= now) return; // 既に過ぎている場合はスキップ
+
+      const delay = reminderTime.getTime() - now.getTime();
+
+      // Service Worker経由で通知をスケジュール
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then((registration) => {
+          setTimeout(() => {
+            registration.showNotification('タスクのリマインダー', {
+              body: task.text,
+              icon: '/logo192.png',
+              tag: `task-${task.id}`,
+              badge: '/logo192.png',
+              requireInteraction: false,
+            });
+          }, delay);
+        });
+      } else if ('Notification' in window && Notification.permission === 'granted') {
+        setTimeout(() => {
+          new Notification('タスクのリマインダー', {
+            body: task.text,
+            icon: '/logo192.png',
+            tag: `task-${task.id}`,
+          });
+        }, delay);
+      }
+    };
+
+    tasks.forEach((task) => {
+      if (task.dueDate && task.reminderMinutes && !task.completed) {
+        scheduleTaskNotification(task);
+      }
+    });
+  }, [tasks, user]);
+
+  // ログアウト
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        backgroundColor: '#F9FAFB'
+      }}>
+        <p style={{ color: '#6B7280' }}>読み込み中...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: 'white' }}>
       <InstallBanner
@@ -188,6 +341,8 @@ function App() {
           title={getViewTitle()}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          user={user}
+          onLogout={handleLogout}
         />
 
         <div style={{ flex: 1, overflowY: 'auto' }}>
