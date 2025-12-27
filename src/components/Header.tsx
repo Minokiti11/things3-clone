@@ -1,13 +1,15 @@
 import React from 'react';
-import { Search } from 'lucide-react';
+import { Search, LogOut } from 'lucide-react';
 
 interface HeaderProps {
   title: string;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  user?: any;
+  onLogout?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, searchQuery, onSearchChange }) => {
+const Header: React.FC<HeaderProps> = ({ title, searchQuery, onSearchChange, user, onLogout }) => {
   return (
     <div style={{
       borderBottom: '1px solid #E5E7EB',
@@ -20,7 +22,31 @@ const Header: React.FC<HeaderProps> = ({ title, searchQuery, onSearchChange }) =
         marginBottom: '16px'
       }}>
         <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>{title}</h2>
-        <div style={{ position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {user && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '14px', color: '#6B7280' }}>
+                {user.email}
+              </span>
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  style={{
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                  title="ログアウト"
+                >
+                  <LogOut size={18} color="#6B7280" />
+                </button>
+              )}
+            </div>
+          )}
+          <div style={{ position: 'relative' }}>
           <Search size={16} style={{
             position: 'absolute',
             left: '12px',
