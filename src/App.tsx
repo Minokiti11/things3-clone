@@ -155,7 +155,18 @@ function App() {
     }
   };
 
+  const deleteProject = async (projectId: number) => {
+    if (!user) return;
+    const success = await database.deleteProject(projectId, user.id);
+    if (success) {
+      setProjects(projects.filter((p) => p.id !== projectId));
+      // 関連するタスクも削除（表示上のみ）
+      setTasks(tasks.filter((t) => t.projectId !== projectId));
+    }
+  };
+
   const addProject = async (name: string) => {
+    console.log('addProject called', name, user);
     if (!user) return;
     
     const newProject: Project = {
@@ -334,6 +345,7 @@ function App() {
         projects={projects}
         onViewChange={handleViewChange}
         onAddProject={addProject}
+        onDeleteProject={deleteProject}
       />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>

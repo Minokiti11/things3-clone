@@ -9,6 +9,7 @@ interface SidebarProps {
   projects: Project[];
   onViewChange: (view: ViewType, projectId: number | null) => void;
   onAddProject: (name: string) => void;
+  onDeleteProject?: (projectId: number) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -17,7 +18,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   tasks,
   projects,
   onViewChange,
-  onAddProject
+  onAddProject,
+  onDeleteProject
 }) => {
   return (
     <div style={{
@@ -108,7 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <button
               onClick={() => {
                 const name = prompt('プロジェクト名:');
-                if (name) onAddProject(name);
+                if (name) { onAddProject(name); }
               }}
               style={{
                 border: 'none',
@@ -123,10 +125,10 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           {projects.map(project => (
-            <button
-              key={project.id}
-              onClick={() => onViewChange('project', project.id)}
-              style={{
+            <div key={project.id} style={{ display: 'flex', alignItems: 'center', marginTop: '4px' }}>
+              <button
+                onClick={() => onViewChange('project', project.id)}
+                style={{
                 width: '100%',
                 display: 'flex',
                 alignItems: 'center',
@@ -160,6 +162,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                 {tasks.filter(t => t.projectId === project.id && !t.completed).length}
               </span>
             </button>
+            <button
+              onClick={() => onDeleteProject && onDeleteProject(project.id)}
+              style={{ marginLeft: 8, background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: 16 }}
+              title="削除"
+            >
+              ×
+            </button>
+          </div>
           ))}
         </div>
 

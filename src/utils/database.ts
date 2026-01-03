@@ -103,6 +103,20 @@ export const database = {
     }));
   },
 
+  // プロジェクトの削除
+  async deleteProject(projectId: number, userId: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('projects')
+      .delete()
+      .eq('id', projectId)
+      .eq('user_id', userId);
+    if (error) {
+      console.error('プロジェクト削除エラー:', error);
+      return false;
+    }
+    return true;
+  },
+
   // プロジェクトの保存
   async saveProject(project: Project, userId: string): Promise<Project | null> {
     const { data, error } = await supabase
